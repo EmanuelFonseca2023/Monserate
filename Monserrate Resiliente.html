@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Monserrate Resiliente</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#3A332C; --paper:#FBF6EE; --coral:#E8835A; --sage:#6C8A5C; --sun:#E8AC4E;
+  --card:#FFFFFF; --line:#EADFCB; --ok:#4F7A47; --bad:#C25B3F; --muted:#8C8274;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--paper); color:var(--ink); font-family:'Nunito',-apple-system,BlinkMacSystemFont,sans-serif;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);}
+header{padding:28px 20px 16px; background:linear-gradient(135deg,var(--coral),var(--sun)); color:#fff; border-radius:0 0 22px 22px}
+header h1{margin:0; font-size:1.5rem; font-weight:800}
+header p{margin:6px 0 0; font-size:.85rem; opacity:.95; font-weight:600}
+nav{display:flex; gap:6px; background:var(--paper); overflow-x:auto; padding:14px 14px 6px}
+nav button{flex:0 0 auto; padding:9px 16px; border:none; background:var(--card); cursor:pointer;
+  font-family:inherit; font-size:.82rem; font-weight:700; color:var(--muted); border-radius:20px; white-space:nowrap; box-shadow:0 1px 3px rgba(58,51,44,.08)}
+nav button.active{color:#fff; background:var(--coral)}
+main{max-width:720px; margin:0 auto; padding:10px 18px 60px}
+.panel{display:none} .panel.active{display:block}
+label{display:block; font-size:.85rem; margin:14px 0 5px; color:var(--ink); font-weight:700}
+input,select{width:100%; padding:12px 14px; border:2px solid var(--line); border-radius:12px;
+  background:#fff; font-family:inherit; font-size:.95rem; color:var(--ink)}
+input:focus,select:focus{outline:none; border-color:var(--coral)}
+button.action{margin-top:20px; width:100%; padding:14px; background:var(--coral); color:#fff;
+  border:none; border-radius:14px; font-size:1rem; font-weight:800; cursor:pointer; font-family:inherit; box-shadow:0 3px 10px rgba(232,131,90,.35)}
+button.action:hover{background:#D9713F}
+button.small{width:auto; padding:7px 12px; font-size:.78rem; margin:0; font-weight:700}
+.card{margin-top:20px; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px; box-shadow:0 2px 10px rgba(58,51,44,.06)}
+.card h3{margin:0 0 10px; font-size:1rem; font-weight:800; padding-bottom:8px; border-bottom:2px solid var(--paper)}
+#qrbox{display:flex; justify-content:center; margin:16px 0}
+textarea{width:100%; min-height:100px; font-family:ui-monospace,'SF Mono',monospace; font-size:.74rem;
+  border:2px solid var(--line); border-radius:12px; padding:12px; resize:vertical; background:#fff; color:var(--ink)}
+.result{margin-top:16px; padding:14px; border-radius:14px; font-size:.92rem; font-weight:600}
+.result.ok{background:#EAF2E6; border:2px solid var(--ok); color:var(--ok)}
+.result.bad{background:#FBEAE3; border:2px solid var(--bad); color:var(--bad)}
+.hint{font-size:.78rem; color:var(--muted); margin-top:5px; font-weight:600}
+.flow{display:flex; gap:8px; overflow-x:auto; margin:4px 0 16px; padding-bottom:4px}
+.flow span{flex:0 0 auto; background:var(--card); border:1px solid var(--line); padding:6px 12px; border-radius:20px; font-size:.72rem; font-weight:700; white-space:nowrap; color:var(--muted)}
+.flow span.on{background:var(--sage); color:#fff; border-color:var(--sage)}
+table{width:100%; border-collapse:collapse; margin-top:10px; font-size:.84rem}
+th,td{text-align:left; padding:10px 6px; border-bottom:1px solid var(--line)}
+th{color:var(--muted); font-weight:700; font-size:.74rem}
+.badge{display:inline-block; padding:3px 10px; border-radius:12px; font-size:.7rem; font-weight:700}
+.badge.pendiente{background:#FBEAE3; color:var(--bad)}
+.badge.asignado{background:#FCF1DC; color:#A9792A}
+.badge.resuelto{background:#EAF2E6; color:var(--ok)}
+select.statusSel{width:auto; padding:4px 8px; font-size:.75rem; border-radius:8px}
+.empty{color:var(--muted); font-size:.85rem; font-style:italic; padding:10px 0}
+.stat{display:flex; gap:12px; flex-wrap:wrap; margin-top:14px}
+.stat div{flex:1; min-width:110px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; text-align:center; box-shadow:0 2px 8px rgba(58,51,44,.05)}
+.stat div b{display:block; font-size:1.5rem; color:var(--coral)}
+.stat div span{font-size:.72rem; color:var(--muted); font-weight:600}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){color-scheme:dark;
+    --ink:#F2EAD9; --paper:#241F1A; --card:#2E2822; --line:#473E33; --coral:#F0916A;}
+  input,textarea,select{background:#2E2822; color:var(--ink)}
+  nav button{background:#2E2822}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>🏔️ Monserrate Resiliente</h1>
+  <p>Red de apoyo para comerciantes afectados por incendios</p>
+</header>
+
+<nav>
+  <button class="active" data-tab="comerciantes">🏪 Comerciantes</button>
+  <button data-tab="verificador">🔍 Verificar</button>
+  <button data-tab="voluntarios">🤝 Voluntarios</button>
+  <button data-tab="solicitudes">📋 Solicitudes</button>
+  <button data-tab="panel">📊 Panel</button>
+</nav>
+
+<main>
+
+  <!-- COMERCIANTES -->
+  <section class="panel active" id="comerciantes">
+    <div class="flow">
+      <span class="on">① Registro</span><span>② Validación</span><span>③ Tu credencial + QR</span><span>④ Listo para pedir ayuda</span>
+    </div>
+    <p class="hint" style="margin:0 0 6px">Regístrate una vez y queda tu credencial lista para mostrar cuando necesites apoyo.</p>
+    <label>Nombre del comerciante</label>
+    <input id="nombre" placeholder="Ej: María Rodríguez">
+    <label>Negocio</label>
+    <input id="negocio" placeholder="Ej: Panadería La Esperanza">
+    <label>Documento de identidad</label>
+    <input id="doc" placeholder="Ej: CC 52.xxx.xxx">
+    <label>Afectación reportada</label>
+    <input id="afect" placeholder="Ej: Incendio forestal — cierre temporal">
+    <p class="hint">Por minimización de datos, la credencial NO incluirá tu documento completo — solo los últimos 4 dígitos y un identificador verificable, además de una fecha de vigencia de 30 días.</p>
+    <label style="display:flex; gap:8px; align-items:flex-start; margin-top:14px"><input type="checkbox" id="consiento" style="width:auto; margin-top:3px"> <span>Autorizo el tratamiento de estos datos personales únicamente para la coordinación de asistencia de Monserrate Resiliente, conforme a la Ley 1581 de 2012 (Habeas Data).</span></label>
+    <button class="action" id="btnEmitir">Validar y emitir credencial</button>
+
+    <div class="card" id="credCard" style="display:none">
+      <h3>Credencial emitida</h3>
+      <div id="qrbox"></div>
+      <p class="hint">Este QR contiene la credencial firmada. Pégala en "Verificador" para comprobarla, o crea una solicitud de ayuda en "Solicitudes".</p>
+      <textarea id="credOut" readonly></textarea>
+    </div>
+  </section>
+
+  <!-- VERIFICADOR -->
+  <section class="panel" id="verificador">
+    <p class="hint">Pega el contenido del QR para comprobar que la firma es válida y que la credencial no ha sido alterada.</p>
+    <textarea id="credIn" placeholder="Pega aquí el JSON de la credencial..."></textarea>
+    <button class="action" id="btnVerificar">Verificar firma</button>
+    <div id="resultado"></div>
+  </section>
+
+  <!-- VOLUNTARIOS -->
+  <section class="panel" id="voluntarios">
+    <label>Nombre</label>
+    <input id="volNombre" placeholder="Ej: Juan Pérez">
+    <label>Apoyo que puede ofrecer</label>
+    <select id="volTipo">
+      <option>Ayuda económica</option>
+      <option>Mano de obra / logística</option>
+      <option>Insumos / materiales</option>
+      <option>Asesoría legal o contable</option>
+      <option>Difusión y conexión con redes</option>
+    </select>
+    <label>Contacto</label>
+    <input id="volContacto" placeholder="Teléfono o correo">
+    <button class="action" id="btnVoluntario">Registrar voluntario</button>
+
+    <div class="card">
+      <h3>Voluntarios registrados</h3>
+      <table id="tablaVoluntarios"><thead><tr><th>Nombre</th><th>Apoyo</th><th>Contacto</th></tr></thead><tbody></tbody></table>
+      <p class="hint">El contacto se muestra oculto por defecto. Solo revélalo si vas a coordinar directamente con esa persona.</p>
+      <div class="empty" id="volVacio">Aún no hay voluntarios registrados.</div>
+    </div>
+  </section>
+
+  <!-- SOLICITUDES -->
+  <section class="panel" id="solicitudes">
+    <p class="hint">Crea una solicitud de apoyo verificando primero la credencial del comerciante (pégala abajo), luego asigna un voluntario desde el Panel.</p>
+    <label>Credencial del comerciante (JSON del QR)</label>
+    <textarea id="solCred" placeholder="Pega aquí la credencial a verificar..."></textarea>
+    <label>Tipo de apoyo solicitado</label>
+    <select id="solTipo">
+      <option>Ayuda económica</option>
+      <option>Mano de obra / logística</option>
+      <option>Insumos / materiales</option>
+      <option>Asesoría legal o contable</option>
+      <option>Difusión y conexión con redes</option>
+    </select>
+    <label>Detalle de la solicitud</label>
+    <input id="solDetalle" placeholder="Ej: Necesita capital para reponer inventario perdido">
+    <button class="action" id="btnSolicitud">Verificar credencial y crear solicitud</button>
+    <div id="solResultado"></div>
+  </section>
+
+  <!-- PANEL -->
+  <section class="panel" id="panel">
+    <p class="hint">Vista de coordinación. En producción este panel requeriría autenticación — aquí es de acceso abierto por ser prototipo.</p>
+    <div class="stat" id="stats"></div>
+    <div class="card">
+      <h3>Seguimiento de solicitudes</h3>
+      <table id="tablaSolicitudes"><thead><tr><th>Comerciante</th><th>Apoyo</th><th>Voluntario</th><th>Estado</th></tr></thead><tbody></tbody></table>
+      <div class="empty" id="solVacio">Aún no hay solicitudes registradas.</div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ---------- navegación ----------
+document.querySelectorAll('nav button').forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.tab).classList.add('active');
+    if(b.dataset.tab==='panel') renderPanel();
+  };
+});
+
+// ---------- estado en memoria (persistido por conveniencia en localStorage, por navegador) ----------
+let state = { voluntarios: [], solicitudes: [] };
+try{
+  const saved = localStorage.getItem('monserrate_state');
+  if(saved) state = JSON.parse(saved);
+}catch(e){}
+function guardar(){
+  try{ localStorage.setItem('monserrate_state', JSON.stringify(state)); }catch(e){}
+}
+
+// ---------- criptografía: llave del emisor (simula la autoridad emisora) ----------
+let issuerKeys = null;
+async function getIssuerKeys(){
+  if(issuerKeys) return issuerKeys;
+  issuerKeys = await crypto.subtle.generateKey({name:"ECDSA", namedCurve:"P-256"}, true, ["sign","verify"]);
+  window.__issuerPubJWK = await crypto.subtle.exportKey("jwk", issuerKeys.publicKey);
+  return issuerKeys;
+}
+function buf2b64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))); }
+function b642buf(b64){ return Uint8Array.from(atob(b64), c=>c.charCodeAt(0)).buffer; }
+
+async function verificarCredencial(jsonTexto){
+  const parsed = JSON.parse(jsonTexto);
+  const { credential, proof } = parsed;
+  const pubKey = await crypto.subtle.importKey("jwk", proof.llavePublicaEmisor, {name:"ECDSA", namedCurve:"P-256"}, true, ["verify"]);
+  const data = new TextEncoder().encode(JSON.stringify(credential));
+  const firmaOk = await crypto.subtle.verify({name:"ECDSA", hash:"SHA-256"}, pubKey, b642buf(proof.firma), data);
+  const vencida = credential.vigenciaHasta ? (new Date(credential.vigenciaHasta) < new Date()) : false;
+  return { valido: firmaOk && !vencida, firmaOk, vencida, credential };
+}
+
+// ---------- emitir credencial ----------
+document.getElementById('btnEmitir').onclick = async ()=>{
+  const nombre = document.getElementById('nombre').value.trim();
+  const negocio = document.getElementById('negocio').value.trim();
+  const doc = document.getElementById('doc').value.trim();
+  const afect = document.getElementById('afect').value.trim();
+  if(!nombre || !negocio || !doc){ alert('Completa al menos nombre, negocio y documento.'); return; }
+  if(!document.getElementById('consiento').checked){ alert('Se requiere tu autorización para el tratamiento de datos antes de emitir la credencial.'); return; }
+
+  const keys = await getIssuerKeys();
+  const docHashBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(doc));
+  const docHash = buf2b64(docHashBuf).slice(0,16);
+  const ultimos4 = doc.replace(/\D/g,'').slice(-4) || '----';
+  const vigenciaDias = 30;
+  const vigenciaHasta = new Date(Date.now() + vigenciaDias*86400000).toISOString();
+  const credential = {
+    id: "cred:monserrate:" + crypto.randomUUID().slice(0,8),
+    tipo: "CredencialComercianteAfectado",
+    emisor: "Monserrate Resiliente — Mesa de Coordinación",
+    emitidoEn: new Date().toISOString(),
+    vigenciaHasta,
+    sujeto: { nombre, negocio, documentoUltimos4: ultimos4, documentoHash: docHash, afectacion: afect }
+  };
+  const data = new TextEncoder().encode(JSON.stringify(credential));
+  const sig = await crypto.subtle.sign({name:"ECDSA", hash:"SHA-256"}, keys.privateKey, data);
+  const credencialFirmada = {
+    credential,
+    proof: { tipo:"ECDSA-P256-SHA256", firma: buf2b64(sig), llavePublicaEmisor: window.__issuerPubJWK }
+  };
+  const json = JSON.stringify(credencialFirmada, null, 2);
+  document.getElementById('credOut').value = json;
+  document.getElementById('credCard').style.display = 'block';
+  document.getElementById('qrbox').innerHTML = '';
+  new QRCode(document.getElementById('qrbox'), { text: json, width:180, height:180, colorDark:"#2B2824", colorLight:"#ffffff" });
+};
+
+// ---------- verificador ----------
+document.getElementById('btnVerificar').onclick = async ()=>{
+  const el = document.getElementById('resultado');
+  try{
+    const { valido, firmaOk, vencida, credential } = await verificarCredencial(document.getElementById('credIn').value);
+    if(valido){
+      el.innerHTML = `<div class="result ok">✓ Firma válida y vigente<br><strong>${credential.sujeto.nombre}</strong> · ${credential.sujeto.negocio}<br><span class="hint">Documento termina en ${credential.sujeto.documentoUltimos4} · Emitida el ${new Date(credential.emitidoEn).toLocaleString('es-CO')} · Vigente hasta ${new Date(credential.vigenciaHasta).toLocaleDateString('es-CO')}</span></div>`;
+    } else if(firmaOk && vencida){
+      el.innerHTML = '<div class="result bad">✗ La firma es válida pero la credencial ya venció. Debe renovarse.</div>';
+    } else {
+      el.innerHTML = '<div class="result bad">✗ Firma inválida — la credencial fue alterada o no fue emitida por esta autoridad.</div>';
+    }
+  }catch(e){
+    el.innerHTML = '<div class="result bad">✗ JSON inválido o credencial incompleta.</div>';
+  }
+};
+
+// ---------- voluntarios ----------
+function renderVoluntarios(){
+  const tbody = document.querySelector('#tablaVoluntarios tbody');
+  tbody.innerHTML = '';
+  document.getElementById('volVacio').style.display = state.voluntarios.length ? 'none' : 'block';
+  state.voluntarios.forEach(v=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${v.nombre}</td><td>${v.tipo}</td><td><span class="hint" data-contacto="${v.contacto}">•••• oculto</span> <button class="small" style="padding:2px 8px; background:var(--card); border:1px solid var(--line); border-radius:3px; cursor:pointer" onclick="this.previousElementSibling.textContent=this.previousElementSibling.dataset.contacto">ver</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+document.getElementById('btnVoluntario').onclick = ()=>{
+  const nombre = document.getElementById('volNombre').value.trim();
+  const contacto = document.getElementById('volContacto').value.trim();
+  if(!nombre || !contacto){ alert('Completa nombre y contacto.'); return; }
+  state.voluntarios.push({ id: crypto.randomUUID().slice(0,8), nombre, tipo: document.getElementById('volTipo').value, contacto });
+  guardar(); renderVoluntarios();
+  document.getElementById('volNombre').value=''; document.getElementById('volContacto').value='';
+};
+
+// ---------- solicitudes ----------
+document.getElementById('btnSolicitud').onclick = async ()=>{
+  const el = document.getElementById('solResultado');
+  try{
+    const { valido, credential } = await verificarCredencial(document.getElementById('solCred').value);
+    if(!valido){
+      el.innerHTML = '<div class="result bad">✗ No se puede crear la solicitud: la credencial no es válida.</div>';
+      return;
+    }
+    const detalle = document.getElementById('solDetalle').value.trim();
+    state.solicitudes.push({
+      id: crypto.randomUUID().slice(0,8),
+      comerciante: credential.sujeto.nombre,
+      negocio: credential.sujeto.negocio,
+      tipo: document.getElementById('solTipo').value,
+      detalle,
+      voluntarioId: '',
+      estado: 'pendiente'
+    });
+    guardar();
+    el.innerHTML = `<div class="result ok">✓ Credencial verificada — solicitud creada para <strong>${credential.sujeto.nombre}</strong>. Ve al Panel para asignar un voluntario.</div>`;
+    document.getElementById('solDetalle').value='';
+  }catch(e){
+    el.innerHTML = '<div class="result bad">✗ JSON inválido. Verifica que copiaste la credencial completa.</div>';
+  }
+};
+
+// ---------- panel ----------
+function renderPanel(){
+  const pend = state.solicitudes.filter(s=>s.estado==='pendiente').length;
+  const asig = state.solicitudes.filter(s=>s.estado==='asignado').length;
+  const res = state.solicitudes.filter(s=>s.estado==='resuelto').length;
+  document.getElementById('stats').innerHTML = `
+    <div><b>${state.voluntarios.length}</b><span>voluntarios</span></div>
+    <div><b>${pend}</b><span>pendientes</span></div>
+    <div><b>${asig}</b><span>asignadas</span></div>
+    <div><b>${res}</b><span>resueltas</span></div>`;
+
+  const tbody = document.querySelector('#tablaSolicitudes tbody');
+  tbody.innerHTML = '';
+  document.getElementById('solVacio').style.display = state.solicitudes.length ? 'none' : 'block';
+
+  state.solicitudes.forEach(s=>{
+    const tr = document.createElement('tr');
+    const volOptions = ['<option value="">— sin asignar —</option>']
+      .concat(state.voluntarios.map(v=>`<option value="${v.id}" ${v.id===s.voluntarioId?'selected':''}>${v.nombre}</option>`)).join('');
+    tr.innerHTML = `
+      <td>${s.comerciante}<br><span class="hint">${s.negocio}</span></td>
+      <td>${s.tipo}<br><span class="hint">${s.detalle||''}</span></td>
+      <td><select class="statusSel volSel" data-id="${s.id}">${volOptions}</select></td>
+      <td>
+        <span class="badge ${s.estado}">${s.estado}</span><br>
+        <select class="statusSel estSel" data-id="${s.id}">
+          <option value="pendiente" ${s.estado==='pendiente'?'selected':''}>pendiente</option>
+          <option value="asignado" ${s.estado==='asignado'?'selected':''}>asignado</option>
+          <option value="resuelto" ${s.estado==='resuelto'?'selected':''}>resuelto</option>
+        </select>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.querySelectorAll('.volSel').forEach(sel=>{
+    sel.onchange = ()=>{
+      const s = state.solicitudes.find(x=>x.id===sel.dataset.id);
+      s.voluntarioId = sel.value;
+      guardar(); renderPanel();
+    };
+  });
+  document.querySelectorAll('.estSel').forEach(sel=>{
+    sel.onchange = ()=>{
+      const s = state.solicitudes.find(x=>x.id===sel.dataset.id);
+      s.estado = sel.value;
+      guardar(); renderPanel();
+    };
+  });
+}
+
+renderVoluntarios();
+renderPanel();
+</script>
+</body>
+</html>
